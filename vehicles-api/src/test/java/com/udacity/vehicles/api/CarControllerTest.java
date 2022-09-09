@@ -20,9 +20,13 @@ import com.udacity.vehicles.domain.manufacturer.Manufacturer;
 import com.udacity.vehicles.service.CarService;
 import java.net.URI;
 import java.util.Collections;
+
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,6 +36,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultHandler;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import javax.transaction.Transactional;
 
 /**
  * Implements testing of the CarController class.
@@ -40,11 +49,14 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @AutoConfigureJsonTesters
+@Transactional
 public class CarControllerTest {
 
     @Autowired
     private MockMvc mvc;
 
+    @InjectMocks
+    private CarController carController;
     @Autowired
     private JacksonTester<Car> json;
 
@@ -96,10 +108,15 @@ public class CarControllerTest {
          *   below (the vehicle will be the first in the list).
          */
         // Add a car to the list car
-        createCar();
-
+//        createCar();
         mvc.perform(get("/cars"))
-                .andExpect(status().isOk()).andExpect(content().string(containsString("Gasoline")));
+                .andExpect(status().isOk()).andExpect(content().string(containsString("Gasoline")))
+                .andExpect(content().string(containsString("3.6L V6")))
+                .andExpect(content().string(containsString("Gasoline")))
+                .andExpect(content().string(containsString("2018")))
+                .andExpect(content().string(containsString("Chevrolet")))
+                .andExpect(content().string(containsString("40.73061")))
+                .andExpect(content().string(containsString("-73.935242")));
     }
 
     /**
@@ -112,11 +129,17 @@ public class CarControllerTest {
          * TODO: Add a test to check that the `get` method works by calling
          *   a vehicle by ID. This should utilize the car from `getCar()` below.
          */
-        createCar();
+//        createCar();
         int id = 1;
         mvc.perform(get("/cars/{id}", id))
                 .andExpect(status().isOk()).andExpect(content().string(containsString("Gasoline")))
-                .andExpect(content().string(containsString("Impala")));
+                .andExpect(content().string(containsString("Impala")))
+                .andExpect(content().string(containsString("3.6L V6")))
+                .andExpect(content().string(containsString("2018")))
+                .andExpect(content().string(containsString("32280")))
+                .andExpect(content().string(containsString("Chevrolet")))
+                .andExpect(content().string(containsString("40.73061")))
+                .andExpect(content().string(containsString("-73.935242")));
     }
 
     /**
@@ -130,9 +153,10 @@ public class CarControllerTest {
          *   when the `delete` method is called from the Car Controller. This
          *   should utilize the car from `getCar()` below.
          */
+
         createCar();
-        int id = 1;
-        mvc.perform(delete("/cars/{id}", id)).andExpect(status().isNoContent());
+        long id = 1L;
+        mvc.perform(MockMvcRequestBuilders.get("/cars/delete/{id}", id)).andExpect(status().isNoContent());
     }
 
     /**

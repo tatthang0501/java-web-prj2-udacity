@@ -4,6 +4,7 @@ package com.udacity.vehicles.api;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
+import com.udacity.vehicles.domain.Condition;
 import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.service.CarService;
 import java.net.URI;
@@ -109,6 +110,7 @@ class CarController {
          *   Update the first line as part of the above implementing.
          */
         car.setId(id);
+        car.setCondition(Condition.USED);
         carService.save(car);
         Resource<Car> resource = assembler.toResource(car);
         return ResponseEntity.ok(resource);
@@ -119,12 +121,13 @@ class CarController {
      * @param id The ID number of the vehicle to remove.
      * @return response that the related vehicle is no longer in the system
      */
-    @DeleteMapping("/{id}")
+    @GetMapping("/delete/{id}")
     ResponseEntity<?> delete(@PathVariable Long id) {
         /**
          * TODO: Use the Car Service to delete the requested vehicle.
          */
         carService.delete(id);
+        System.out.println(carService.list().size() + " size of list");
         return ResponseEntity.noContent().build();
     }
 }
