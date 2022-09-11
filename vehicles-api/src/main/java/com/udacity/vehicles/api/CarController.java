@@ -90,7 +90,6 @@ class CarController {
          */
 
         Car savedCar = carService.save(car);
-        System.out.println(savedCar.toString());
         Resource<Car> resource = assembler.toResource(savedCar);
         return ResponseEntity.created(new URI(resource.getId().expand().getHref())).body(resource);
     }
@@ -110,7 +109,6 @@ class CarController {
          *   Update the first line as part of the above implementing.
          */
         car.setId(id);
-        car.setCondition(Condition.USED);
         carService.save(car);
         Resource<Car> resource = assembler.toResource(car);
         return ResponseEntity.ok(resource);
@@ -127,7 +125,6 @@ class CarController {
          * TODO: Use the Car Service to delete the requested vehicle.
          */
         carService.delete(id);
-        System.out.println(carService.list().size() + " size of list");
         return ResponseEntity.noContent().build();
     }
 }

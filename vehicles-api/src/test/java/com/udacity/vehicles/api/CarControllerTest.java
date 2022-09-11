@@ -3,11 +3,8 @@ package com.udacity.vehicles.api;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.udacity.vehicles.client.maps.MapsClient;
@@ -18,12 +15,11 @@ import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.domain.car.Details;
 import com.udacity.vehicles.domain.manufacturer.Manufacturer;
 import com.udacity.vehicles.service.CarService;
+
 import java.net.URI;
 import java.util.Collections;
 
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -36,9 +32,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import javax.transaction.Transactional;
 
@@ -55,8 +49,6 @@ public class CarControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @InjectMocks
-    private CarController carController;
     @Autowired
     private JacksonTester<Car> json;
 
@@ -157,6 +149,37 @@ public class CarControllerTest {
         createCar();
         long id = 1L;
         mvc.perform(MockMvcRequestBuilders.get("/cars/delete/{id}", id)).andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void updateCar() throws Exception {
+        long id = 1;
+        Car car = new Car();
+        car.setLocation(new Location(40.2310, -73.91342)); // Updating field
+        Details details = new Details();
+        Manufacturer manufacturer = new Manufacturer(101, "Chevrolet");
+        details.setManufacturer(manufacturer);
+        details.setModel("Impala");
+        details.setMileage(32280);
+        details.setExternalColor("white updating"); // Updating field
+        details.setBody("sedan updating"); // Updating field
+        details.setEngine("3.6L V6");
+        details.setFuelType("Gasoline");
+        details.setModelYear(2022); // Updating field
+        details.setProductionYear(2022); // Updating field
+        details.setNumberOfDoors(4);
+        car.setDetails(details);
+        car.setCondition(Condition.USED);
+
+        mvc.perform(put("/cars/{id}", id)
+                                .content(json.write(car).getJson())
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk()).andExpect(content().string(containsString("40.231")))
+                .andExpect(content().string(containsString("-73.91342")))
+                .andExpect(content().string(containsString("white updating")))
+                .andExpect(content().string(containsString("sedan updating")))
+                .andExpect(content().string(containsString("2022")));
     }
 
     /**
